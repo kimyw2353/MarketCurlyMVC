@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper 
+   namespace="com.myspring.mapper.AdminMapper">
+   
+   <select id="getCategoryList" resultType="Category">
+   		select * from category order by cg_num
+   </select>
+   
+   <insert id="productInsert" parameterType="Product">
+   		<selectKey keyProperty="pnum" resultType="int" order="BEFORE">
+   			select pnum_seq.nextval from dual
+   		</selectKey>
+   		insert into product values(#{pnum}, #{pname}, #{pcompany}
+   		,#{origin}, #{pimage1:VARCHAR}, #{pimage2:VARCHAR}, #{pimage3:VARCHAR}
+   		,#{pqty}, #{price}, #{saleprice}, #{pcontents}, #{pspec},#{pspec2},#{pspec3}, #{point}
+   		, sysdate, #{sbdate}, #{cg_num})
+   </insert>
+   
+   <sql id="all_column">
+   		pnum, pname, pcompany, origin, nvl(pimage1, 'noimage.png') pimage1
+   		, nvl(pimage2, 'noimage.png') pimage2
+   		, nvl(pimage3, 'noimage.png') pimage3
+   		, pqty, price, saleprice, pcontents, pspec,pspec2,pspec3, point, pindate, sbdate, cg_num
+   </sql>
+   
+   <select id="productList" resultType="Product" parameterType="Page">
+   		select * from(
+   		select a.*, rownum rn from(
+   		select <include refid="all_column"/>
+   		from product order by pindate desc, pnum desc) a
+   		) where rn between #{start} and #{end}
+   </select>
+   
+   <select id="selectByPnum" resultType="Product" parameterType="int">
+   		select <include refid="all_column"/>
+   		from product where pnum=#{value}
+   </select>
+   
+   <update id="productEdit" parameterType="Product">
+   		update product set pname=#{pname}, pcompany=#{pcompany}, origin=#{origin}
+   		<if test="pimage1 != null and pimage1 != '' "> 
+   		, pimage1=#{pimage1:VARCHAR}
+   		 </if>
+   		 <if test="pimage2 != null and pimage2 != '' "> 
+   		, pimage2=#{pimage2:VARCHAR}
+   		 </if>
+   		 <if test="pimage3 != null and pimage3 != '' "> 
+   		, pimage3=#{pimage3:VARCHAR}
+   		 </if>
+   		, pqty=#{pqty}, price=#{price}, saleprice=#{saleprice}, pcontents=#{pcontents}
+   		, pspec=#{pspec},pspec2=#{pspec2},pspec3=#{pspec3}, point=#{point}, pindate=sysdate, sbdate=#{sbdate}, cg_num=#{cg_num}
+   		where pnum=#{pnum}
+   </update>
+   
+   <delete id="productDel" parameterType="int">
+   		delete from product where pnum=#{pnum}
+   </delete>
+   
+   <select id="getFindTotalCount" parameterType="Page" resultType="int">
+   		select count(pnum) from product
+   </select>
+   
+   
+   
+</mapper>
